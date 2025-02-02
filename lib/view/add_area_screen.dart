@@ -1,28 +1,38 @@
 import 'package:controls_data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:tora/models/area_model.dart';
+import 'package:tora/notifiers/areas_notify.dart';
 
-import '../api/config.dart';
+// ignore: must_be_immutable
+class AddAreaScreen extends StatelessWidget {
+  AddAreaScreen({super.key, AreaModel? area, this.editing = false}) {
+    if (area != null) {
+      this.area = AreaModel.fromMap(area.toMap(), area.id);
+      initalId = area.id;
+    }
+  }
+  AreaModel? area = AreaModel.createNew();
+  String? initalId ;
+  bool editing = false;
 
-class CadastroAreaPage extends StatefulWidget {
-  const CadastroAreaPage({super.key});
-
-  @override
-  _CadastroAreaPageState createState() => _CadastroAreaPageState();
-}
-
-class _CadastroAreaPageState extends State<CadastroAreaPage> {
   final _formKey = GlobalKey<FormState>();
-  String _nome = '';
-  double _tamanho = 0.0;
-  String _id = '';
-  String _local = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cadastrar Área Rural'),
+        actions: [
+          if (editing)
+          IconButton(icon:Icon(Icons.delete),  onPressed: (){
+            area!.estado = 'X';
+            ODataInst().put('areas',  area!.toMap() ) .then((x) {
+              Navigator.pop(context);
+              areaNotifyChanged.notify();
+            });
+          })  
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -31,7 +41,9 @@ class _CadastroAreaPageState extends State<CadastroAreaPage> {
           child: Column(
             children: <Widget>[
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Identificador da Área'),
+                initialValue: area?.id,
+                decoration:
+                    const InputDecoration(labelText: 'Identificador da Área'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira o identificador da área';
@@ -39,11 +51,12 @@ class _CadastroAreaPageState extends State<CadastroAreaPage> {
                   return null;
                 },
                 onSaved: (value) {
-                  _id = value!;
+                  area?.id = value!;
                 },
-              ),  
+              ),
 
               TextFormField(
+                initialValue: area?.nome,
                 decoration: const InputDecoration(labelText: 'Nome da Área'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -52,10 +65,11 @@ class _CadastroAreaPageState extends State<CadastroAreaPage> {
                   return null;
                 },
                 onSaved: (value) {
-                  _nome = value!;
+                  area?.nome = value!;
                 },
               ),
               TextFormField(
+                initialValue: area?.tamanho.toString(),
                 decoration:
                     const InputDecoration(labelText: 'Tamanho da Área (ha)'),
                 keyboardType: TextInputType.number,
@@ -69,13 +83,15 @@ class _CadastroAreaPageState extends State<CadastroAreaPage> {
                   return null;
                 },
                 onSaved: (value) {
-                  _tamanho = double.parse(value!);
+                  area?.tamanho = double.parse(value!);
                 },
               ),
-//lo 
+//lo
               // adicionar campo para pegar a localização da area
-    TextFormField(
-                decoration: const InputDecoration(labelText: 'Localização da Área'),
+              TextFormField(
+                initialValue: area?.localizacao.toString(),
+                decoration:
+                    const InputDecoration(labelText: 'Localização da Área'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira a localização da área';
@@ -83,11 +99,11 @@ class _CadastroAreaPageState extends State<CadastroAreaPage> {
                   return null;
                 },
                 onSaved: (value) {
-                  _local = value!;
+                  //area?.local = value!;
                 },
-              ),  
+              ),
               // adicionar campo para pegar a data de plantio da area
-    
+
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
@@ -98,7 +114,8 @@ class _CadastroAreaPageState extends State<CadastroAreaPage> {
                     gravar(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                          content: Text('Área $_nome cadastrada com sucesso!')),
+                          content:
+                              Text('Área ($nome) cadastrada com sucesso!')),
                     );
                   }
                 },
@@ -111,15 +128,31 @@ class _CadastroAreaPageState extends State<CadastroAreaPage> {
     );
   }
 
+  get nome => area?.nome;
   void gravar(context) {
     try {
-      ODataInst(). post( 'areas', {'id':_id,'nome': _nome, 'tamanho': _tamanho, "local":_local }).then((x){
+      if (editing) {
+        ODataInst().put('areas', area!.toMap()
+        ).then((x) {
+          Navigator.pop(context);
+          areaNotifyChanged.notify();
+        });
+        return;
+      }
+      ODataInst().post('areas', area!.toMap()
+      ).then((x) {
+
         Navigator.pop(context);
+        areaNotifyChanged.notify();
       });
     } catch (e) {
       if (kDebugMode) {
         print(e);
       }
     }
+  }
+
+  static edit(AreaModel area) {
+    return AddAreaScreen(area: area, editing: true);
   }
 }
