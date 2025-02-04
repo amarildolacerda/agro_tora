@@ -27,7 +27,7 @@ class AddAreaScreen extends StatelessWidget {
           if (editing)
           IconButton(icon:Icon(Icons.delete),  onPressed: (){
             area!.estado = 'X';
-            ODataInst().put('areas',  area!.toMap() ) .then((x) {
+            ODataInst().post('delete/areas',  area!.toMap() ) .then((x) {
               Navigator.pop(context);
               areaNotifyChanged.notify();
             });

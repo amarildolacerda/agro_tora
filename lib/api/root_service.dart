@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../view/areas_list_screen.dart';
+import '../views/areas_list_screen.dart';
 
 class Roots {
   final area = 'area';

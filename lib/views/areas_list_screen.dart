@@ -5,7 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:tora/api/data_service.dart';
 import 'package:tora/api/root_service.dart';
 import 'package:tora/notifiers/areas_notify.dart';
-import 'package:tora/view/add_area_screen.dart';
+import 'package:tora/views/add_area_screen.dart';
 
 import '../models/area_model.dart'; // Importe o modelo de área
 
@@ -14,8 +14,9 @@ class AreasListScreen extends StatelessWidget {
 
   // Método para buscar a lista de áreas do Firestore
   Future<List<dynamic>> _fetchAreas() async {
-    final snapshot =
-        await API.getRows(resource: 'areas',);// filter: "estado eq 'A'");
+    final snapshot = await API.getRows(
+      resource: 'areas',
+    ); // filter: "estado eq 'A'");
     return snapshot as List<dynamic>;
   }
 
@@ -25,7 +26,7 @@ class AreasListScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Áreas Cadastradas'),
         leading: IconButton(
-          icon: Icon( Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             roots.goToHome(context);
           },
@@ -84,6 +85,9 @@ class AreasListScreen extends StatelessWidget {
         onPressed: () {
           // Navega para a tela de cadastro de área (opcional)
           // Navigator.of(context).push(...);
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => AddAreaScreen()),
+          );
         },
         child: Icon(Icons.add),
       ),

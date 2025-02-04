@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tora/view/menu_drawer.dart';
+import 'package:tora/views/menu_drawer.dart';
 import '../api/data_service.dart';
 import 'os_detail_screen.dart';
 import 'add_os_screen.dart';

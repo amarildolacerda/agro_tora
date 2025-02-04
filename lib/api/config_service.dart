@@ -15,10 +15,27 @@ class Config {
 
   ODataInst get api => ODataInst();
 
-  init({required String baseUrl}) {
+  init({required String baseUrl, bool dbgMode = false}) {
     accountId = 'dpl';
     api.baseUrl = baseUrl;
     checkLembrar();
+
+    api.client.inDebug = dbgMode;
+    if (dbgMode) {
+      api.client.notify.stream.listen((event) {
+        // ignore: avoid_print
+        print('notify: $event');
+      });
+      api.client.inDebug = true;
+      api.client.notifyLog.stream.listen((event) {
+        // ignore: avoid_print
+        print('notifyLog: $event');
+      });
+      api.client.notifyError.stream.listen((event) {
+        // ignore: avoid_print
+        print('notifyError: $event');
+      });
+    }
   }
 
   factory Config() => _singleton;
@@ -33,8 +50,8 @@ class Config {
   String get accountId => _accountId;
   set accountId(String x) {
     _accountId = x;
-      api.client.addHeader('contaid', accountId);
-    }
+    api.client.addHeader('contaid', accountId);
+  }
 
 /*Future<Map<String,dynamic>>getRows({
     required String resource,
@@ -79,11 +96,10 @@ Future<Map<String,dynamic>> send(ODataQuery query, {String? cacheControl}) async
   }
 */
   final UserModel user = UserModel();
-  final ValueNotifier<bool> logadoEvent= ValueNotifier(false);
+  final ValueNotifier<bool> logadoEvent = ValueNotifier(false);
 
   login(String usuario, String senha) {
     return api.loginBasic(accountId, usuario, senha).then((r) {
-    
       apiKey = api.client.authorization;
       user.usuario = usuario;
       user.senha = senha;
@@ -96,7 +112,6 @@ Future<Map<String,dynamic>> send(ODataQuery query, {String? cacheControl}) async
   set logado(bool x) {
     logadoEvent.value = x;
   }
-
 
   bool lembrarUltimoLogin = false;
   Future<bool> checkLembrar() async {
@@ -116,15 +131,17 @@ Future<Map<String,dynamic>> send(ODataQuery query, {String? cacheControl}) async
   }
 
   // Método para limpar os dados do último login
-  void limparLembrar() async {
+  void limparLembrar({bool tudo = false}) async {
     lembrarUltimoLogin = false;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('usuario');
-    await prefs.remove('senha');
     await prefs.setBool('lembrar', false);
-
+    await prefs.remove('senha');
+    if (tudo) {
+      await prefs.remove('usuario');
+    }
   }
-  void logout(){
+
+  void logout() {
     limparLembrar();
     logado = false;
   }

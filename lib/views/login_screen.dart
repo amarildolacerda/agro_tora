@@ -21,6 +21,12 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final ValueNotifier<bool> lembrar =
         ValueNotifier<bool>(Config().lembrarUltimoLogin);
+
+
+
+
+// sugerir melhoria na interface
+
     return Scaffold(
       appBar: AppBar(title: Text('Login')),
       body: Padding(
@@ -40,6 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
             ValueListenableBuilder(
               valueListenable: lembrar,
               builder: (BuildContext context, dynamic value, Widget? child) {
+// posicionar o texto ao lado direito
+
                 return CheckboxListTile(
                   title: Text('Lembrar último login'),
                   selected: lembrar.value,
